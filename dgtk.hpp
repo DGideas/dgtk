@@ -42,7 +42,7 @@ namespace dgtk
 	{
 		friend class cppdas_dataset;
 		public:
-			cppdas_data_element() = default;
+			cppdas_data_element() = delete;
 			cppdas_data_element(const std::string&,
 				const cppdas_basic::type&);
 			cppdas_data_element(const cppdas_data_element&) = default;
@@ -75,15 +75,27 @@ namespace dgtk
 			~cppdas_dataset() = default;
 		private:
 			typedef std::vector<cppdas_data_element> DataRow;
-			typedef std::vector<DataRow> DataSet;
+		public:
+			void getTitle(const DataRow&);
 		private:
-			DataSet _data;
+			std::vector<DataRow> data;
+			std::vector<std::string> title;
 	};
+	
+	void cppdas_dataset::getTitle(const DataRow& _dataRow)
+	{
+		for (const cppdas_data_element& element: _dataRow)
+		{
+			this->title.push_back(element._data);
+		}
+		return;
+	}
 	
 	// Like Python pandas, cppdas is a class about C++ data analysis.
 	// If you use:
-	// using pd = dgtk::cppdas;
+	// 	using pd = dgtk::cppdas;
 	// It looks like python pandas :)
+	// e.g. auto iris = pd::read_csv("iris.data");
 	class cppdas
 	{
 		public:
@@ -135,6 +147,7 @@ namespace dgtk
 		return read_csv_base(_fsHandle, defaultSplitCharacter, _haveHeader);
 	}
 	
+	// This is the foundamental function for cppdas::read_csv
 	cppdas_dataset cppdas::read_csv_base(std::fstream& _fsHandle,
 		const std::vector<std::string>& _split,
 		const bool& _haveHeader)
@@ -143,10 +156,13 @@ namespace dgtk
 		{
 			size_t rowNumber = 0;
 			std::string line;
+			// For every line in csv file.
+			// According to rowNumber and _haveHeader, the first line
+			// of csv file would be title or header.
 			while (std::getline(_fsHandle, line))
 			{
 				std::string row;
-				cppdas_dataset::DataRow data;
+				cppdas_dataset::DataRow data; // DataRow is std::vector
 				// Remove \r from line
 				for (const auto& letter: line)
 				{
@@ -156,18 +172,39 @@ namespace dgtk
 						row += letter;
 					}
 				}
+				// Split every element from line according spliter.
 				while (true)
 				{
+					if (row.empty())
+						break;
 					bool findStatus = false;
 					auto findLocation = std::string::npos;
+					size_t splitSize = 0;
 					for (const auto& _splitUnit: _split)
 					{
-						if (row.find(_splitUnit) != std::string::npos)
+						findLocation = row.find(_splitUnit);
+						if (findLocation != std::string::npos)
 						{
 							findStatus = true;
+							splitSize = _splitUnit.size();
+							break;
 						}
 					}
+					if (findStatus)
+					{
+						std::string&& _element_data =
+							row.substr(0, findLocation);
+						data.push_back(cppdas_data_element(_element_data));
+					}
+					else
+					{
+						if (row.size())
+							data.push_back(row);
+					}
 				}
+				if (data.size())
+					res.data.push_back(data);
+					rowNumber++;
 			}
 		}
 		return res;
