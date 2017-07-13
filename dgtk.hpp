@@ -94,8 +94,8 @@ namespace dgtk
 			size_t number;
 			//typedef decltype(data.begin())&& beginIterator;
 			//typedef decltype(data.rbegin())&& reverseIterator;
-			typedef std::vector<cppdas_data_element>::iterator beginIterator;
-			typedef std::vector<cppdas_data_element>::reverse_iterator reverseIterator;
+			typedef std::vector<cppdas_data_element>::iterator&& beginIterator;
+			typedef std::vector<cppdas_data_element>::reverse_iterator&& reverseIterator;
 			beginIterator begin();
 			reverseIterator rbegin();
 			beginIterator end();
@@ -368,4 +368,235 @@ namespace dgtk
 	{
 		
 	};
-}
+	
+	template <typename _DataType = double, typename _CategoryType = int>
+	class Perceptron
+	{
+		public:
+			Perceptron();
+			Perceptron(const pair<vector<_DataType>, _CategoryType>&);
+			Perceptron(const vector<pair<vector<_DataType>, _CategoryType>>&);
+			bool addPoint(const pair<vector<_DataType>, _CategoryType>&);
+			bool addTrainingSet(
+				const vector<pair<vector<_DataType>, _CategoryType>>&);
+			size_t getDimension();
+			size_t size();
+			string getArg();
+			_CategoryType getCategory(const vector<_DataType>&);
+			void learning();
+		private:
+			size_t dimension;
+			vector<pair<vector<_DataType>, _CategoryType>> trainingSet;
+			_DataType argBias;
+			vector<_DataType> argWeight;
+			_DataType learningStep;
+		private:
+			void initializeArgWeight();
+			_CategoryType functionSign(const _DataType&);
+			bool checkPointCategoryRight();
+			bool judgePoint(const pair<vector<_DataType>, _CategoryType>&);
+			void updateArgViaLearning(
+				const pair<vector<_DataType>, _CategoryType>&);
+	};
+
+	template <typename _DataType, typename _CategoryType>
+	Perceptron<_DataType, _CategoryType>::Perceptron()
+	{
+		this->dimension = 0;
+		this->argBias = (_DataType)0;
+		this->learningStep = (_DataType)0.1;
+		return;
+	}
+
+	template <typename _DataType, typename _CategoryType>
+	Perceptron<_DataType, _CategoryType>::Perceptron(
+		const pair<vector<_DataType>, _CategoryType>& _point)
+	{
+		this->Perceptron();
+		this->addPoint(_point);
+		return;
+	}
+
+	template <typename _DataType, typename _CategoryType>
+	Perceptron<_DataType, _CategoryType>::Perceptron(
+		const vector<pair<vector<_DataType>, _CategoryType>>& _set)
+	{
+		this->Perceptron();
+		this->addTrainingSet(_set);
+		return;
+	}
+
+	template <typename _DataType, typename _CategoryType>
+	bool Perceptron<_DataType, _CategoryType>::addPoint(
+		const pair<vector<_DataType>, _CategoryType>& _point)
+	{
+		if (this->dimension)
+		{
+			if (this->dimension != _point.first.size())
+			{
+				return false;
+			}
+		}
+		else
+		{
+			if (_point.first.size() == 0)
+			{
+				return false;
+			}
+			this->dimension = _point.first.size();
+			this->initializeArgWeight();
+		}
+		this->trainingSet.push_back(_point);
+		return true;
+	}
+
+	template <typename _DataType, typename _CategoryType>
+	bool Perceptron<_DataType, _CategoryType>::addTrainingSet(
+		const vector<pair<vector<_DataType>, _CategoryType>>& _set)
+	{
+		if (!_set.first.size())
+		{
+			return false;
+		}
+		size_t trainingSetDimension = _set[0].first.size();
+		if (trainingSetDimension == 0)
+		{
+			return false;
+		}
+		if (this->dimension && this->dimension != trainingSetDimension)
+		{
+			return false;
+		}
+		for (const auto& _element: _set.first)
+		{
+			if (_element.first.size() != trainingSetDimension)
+			{
+				return false;
+			}
+		}
+		if (!this->dimension)
+		{
+			this->dimension = trainingSetDimension;
+		}
+		this->initializeArgWeight();
+		for (const auto& _element: _set)
+		{
+			this->trainingSet.push_back(_element);
+		}
+		return true;
+	}
+
+	template <typename _DataType, typename _CategoryType>
+	size_t Perceptron<_DataType, _CategoryType>::getDimension()
+	{
+		return this->dimension;
+	}
+
+	template <typename _DataType, typename _CategoryType>
+	size_t Perceptron<_DataType, _CategoryType>::size()
+	{
+		return this->trainingSet.size();
+	}
+
+	template <typename _DataType, typename _CategoryType>
+	string Perceptron<_DataType, _CategoryType>::getArg()
+	{
+		string res = "w: [";
+		for (const auto& element: this->argWeight)
+		{
+			res = res + to_string(element) + ", ";
+		}
+		res = res.substr(0, res.size()-2) + "], b: " + to_string(this->argBias);
+		return res;
+	}
+
+	template <typename _DataType, typename _CategoryType>
+	_CategoryType Perceptron<_DataType, _CategoryType>::getCategory(
+		const vector<_DataType>& _point)
+	{
+		_CategoryType resCategory = (_CategoryType)0;
+		_DataType judge = (_DataType)0;
+		if (_point.size() != this->dimension)
+		{
+			cerr<<"判断用点维度不符"<<endl;
+			exit(-1);
+		}
+		for (size_t dimensionN=0; dimensionN!=this->dimension; dimensionN++)
+		{
+			judge += this->argWeight[dimensionN] * _point[dimensionN];
+		}
+		judge += this->argBias;
+		resCategory = functionSign(judge);
+		return resCategory;
+	}
+
+	template <typename _DataType, typename _CategoryType>
+	void Perceptron<_DataType, _CategoryType>::learning()
+	{
+		for (size_t i=0; i!=5; i++)
+		{
+			for (const auto& p: this->trainingSet)
+			{
+				if (!judgePoint(p))
+				{
+					cout<<"对于点("<<p.first[0]<<","<<p.first[1]<<"): "<<judgePoint(p)<<endl;
+					this->updateArgViaLearning(p);
+				}
+				cout<<getArg()<<endl;
+			}
+		}
+		return;
+	}
+
+	template <typename _DataType, typename _CategoryType>
+	void Perceptron<_DataType, _CategoryType>::initializeArgWeight()
+	{
+		for (size_t i=0; i!=this->dimension; i++)
+		{
+			this->argWeight.push_back((_DataType)1);
+		}
+		return;
+	}
+
+	template <typename _DataType, typename _CategoryType>
+	_CategoryType Perceptron<_DataType, _CategoryType>::functionSign(
+		const _DataType& _var)
+	{
+		if (_var > 0)
+		{
+			return (_CategoryType)1;
+		}
+		else
+		{
+			return (_CategoryType)-1;
+		}
+	}
+
+	template <typename _DataType, typename _CategoryType>
+	bool Perceptron<_DataType, _CategoryType>::judgePoint(
+		const pair<vector<_DataType>, _CategoryType>& _point)
+	{
+		_CategoryType T = (-1) * _point.second * getCategory(_point.first);
+		if (T > 0)
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+
+	template <typename _DataType, typename _CategoryType>
+	void Perceptron<_DataType, _CategoryType>::updateArgViaLearning(
+		const pair<vector<_DataType>, _CategoryType>& _point)
+	{
+		for (size_t dimensionN=0; dimensionN!=this->dimension; dimensionN++)
+		{
+			this->argWeight[dimensionN] = this->argWeight[dimensionN] +
+				this->learningStep * _point.second * _point.first[dimensionN];
+		}
+		this->argBias = this->argBias + this->learningStep * _point.second;
+		return;
+	}
+} // End of namespace dgtk.
