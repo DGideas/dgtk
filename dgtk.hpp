@@ -89,9 +89,16 @@ namespace dgtk
 	class cppdas_dataset_row
 	{
 		public:
-			void push_back(const cppdas_data_element&);
 			std::vector<cppdas_data_element> data;
 			size_t number;
+		public:
+			void push_back(const cppdas_data_element&);
+			// typedef decltype(data.begin()) forwardIterator;
+			// typedef decltype(data.rbegin()) reverseIterator;
+			// forwardIterator begin();
+			// forwardIterator end();
+			// reverseIterator rbegin();
+			// reverseIterator rend();
 			size_t size();
 			bool empty();
 	};
@@ -101,6 +108,21 @@ namespace dgtk
 		this->data.push_back(_ele);
 		return;
 	}
+	
+	// cppdas_dataset_row::forwardIterator cppdas_dataset_row::begin()
+	// {
+	// 	return this->data.begin();
+	// }
+	
+	// cppdas_dataset_row::forwardIterator cppdas_dataset_row::end()
+	// {
+	// 	return this->data.end();
+	// }
+	
+	// cppdas_dataset_row::reverseIterator cppdas_dataset_row::rbegin();
+	// {
+	// 	return this->data.rbegin();
+	// }
 	
 	size_t cppdas_dataset_row::size()
 	{
