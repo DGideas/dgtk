@@ -19,6 +19,13 @@ namespace dgtk
 // In order to avoid look-up ambiguous, using std:: prefix
 // when you use standard library components.
 {
+	template <typename _T>
+	void debug(const _T& _something)
+	{
+		std::cout<<_something<<std::endl;
+		return;
+	}
+	
 	// This class manage the basic type used in cppdas dataset.
 	class cppdas_basic
 	{
@@ -63,6 +70,21 @@ namespace dgtk
 		return;
 	}
 	
+	class cppdas_dataset_column_attr
+	{
+		public:
+			cppdas_dataset_column_attr() = default;
+			cppdas_dataset_column_attr(const cppdas_dataset_column_attr&) =
+				default;
+			cppdas_dataset_column_attr(cppdas_dataset_column_attr&&) =
+				default;
+			cppdas_dataset_column_attr& operator=(
+				const cppdas_dataset_column_attr&) = default;
+			~cppdas_dataset_column_attr() = default;
+		private:
+			
+	};
+	
 	// cppdas_dataset is a class that storage linear dataset.
 	class cppdas_dataset
 	{
@@ -75,20 +97,86 @@ namespace dgtk
 			~cppdas_dataset() = default;
 		private:
 			typedef std::vector<cppdas_data_element> DataRow;
-		public:
-			void getTitle(const DataRow&);
 		private:
 			std::vector<DataRow> data;
 			std::vector<std::string> title;
+		public:
+			void setTitle(const DataRow&);
+			void head(const size_t&);
+			void tail(const size_t&);
+			void info();
+		private:
+			void rbIterator(const size_t&, const bool&);
 	};
 	
-	void cppdas_dataset::getTitle(const DataRow& _dataRow)
+	void cppdas_dataset::setTitle(const DataRow& _dataRow)
 	{
 		for (const cppdas_data_element& element: _dataRow)
 		{
 			this->title.push_back(element._data);
 		}
 		return;
+	}
+	
+	// Like Python pandas.head(), cppdas_dataset::head output the
+	// information of a dataset.
+	void cppdas_dataset::head(const size_t& _viewRowNumber = 5)
+	{
+		this->rbIterator(_viewRowNumber, false);
+		return;
+	}
+	
+	// Like Python pandas.tail(), cppdas_dataset::tail output the
+	// information of a dataset.
+	void cppdas_dataset::tail(const size_t& _viewRowNumber = 5)
+	{
+		this->rbIterator(_viewRowNumber, true);
+		return;
+	}
+	
+	void cppdas_dataset::rbIterator(const size_t& _viewRowNumber,
+		const bool& _reverse)
+	{
+		if (this->title.size())
+		{
+			std::cout<<"\t"; // Tab for row-number column
+			for (const auto& element: this->title)
+			{
+				std::cout<<element<<"\t";
+			}
+			std::cout<<std::endl;
+		}
+		for (size_t iteratorDistance=0;
+			iteratorDistance<_viewRowNumber;
+			iteratorDistance++)
+		{
+			if (_reverse)
+			{
+				if (this->data.rbegin()+iteratorDistance != this->data.rend())
+				{
+					std::cout<<iteratorDistance<<"\t";
+					for (const auto& element:
+						*(this->data.rbegin()+iteratorDistance))
+					{
+						std::cout<<element._data<<"\t";
+					}
+					std::cout<<std::endl;
+				}
+			}
+			else
+			{
+				if (this->data.begin()+iteratorDistance != this->data.end())
+				{
+					std::cout<<iteratorDistance<<"\t";
+					for (const auto& element:
+						*(this->data.begin()+iteratorDistance))
+					{
+						std::cout<<element._data<<"\t";
+					}
+					std::cout<<std::endl;
+				}
+			}
+		}
 	}
 	
 	// Like Python pandas, cppdas is a class about C++ data analysis.
@@ -195,15 +283,23 @@ namespace dgtk
 						std::string&& _element_data =
 							row.substr(0, findLocation);
 						data.push_back(cppdas_data_element(_element_data));
+						row = row.substr(findLocation+splitSize);
 					}
 					else
 					{
 						if (row.size())
 							data.push_back(row);
+						break;
 					}
 				}
 				if (data.size())
-					res.data.push_back(data);
+					if (rowNumber || !_haveHeader)
+						res.data.push_back(data);
+					else
+						// It is the first line of file
+						res.setTitle(data);
+					// If we meet a blank line, ignore it and row number
+					// doesn't increase.
 					rowNumber++;
 			}
 		}
