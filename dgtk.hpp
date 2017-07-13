@@ -177,7 +177,7 @@ namespace dgtk
 			iteratorDistance<_viewRowNumber;
 			iteratorDistance++)
 		{
-			auto instance = this->data.data.data;
+			std::vector<DataRow> instance = this->data;
 			if (_reverse)
 			{
 				
@@ -185,7 +185,7 @@ namespace dgtk
 				{
 					std::cout<<iteratorDistance<<"\t";
 					for (const auto& element:
-						*(instance.rbegin()+iteratorDistance))
+						(instance.rbegin()+iteratorDistance)->data)
 					{
 						std::cout<<element._data<<"\t";
 					}
@@ -198,7 +198,7 @@ namespace dgtk
 				{
 					std::cout<<iteratorDistance<<"\t";
 					for (const auto& element:
-						*(instance.begin()+iteratorDistance))
+						(instance.begin()+iteratorDistance)->data)
 					{
 						std::cout<<element._data<<"\t";
 					}
