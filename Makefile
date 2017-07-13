@@ -3,11 +3,11 @@ dgtkCoreFiles = dgtk.cpp dgtk.hpp
 make: $(dgtkCoreFiles)
 	g++ dgtk.cpp -o dgtk --std=c++14
 
-compile: $(dgtkCoreFiles)
+test: $(dgtkCoreFiles)
 	g++ dgtk.cpp -o dgtk --std=c++14
 	rm dgtk
 
-test: $(dgtkCoreFiles)
+run: $(dgtkCoreFiles)
 	g++ dgtk.cpp -o dgtk --std=c++14
 	./dgtk
 	rm dgtk
