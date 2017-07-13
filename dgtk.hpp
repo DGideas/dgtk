@@ -374,25 +374,25 @@ namespace dgtk
 	{
 		public:
 			LinearRegression();
-			LinearRegression(const vector<_DataType>&);
-			LinearRegression(const vector<vector<_DataType>>&);
-			bool addPoint(const vector<_DataType>&);
-			bool addSet(const vector<vector<_DataType>>&);
+			LinearRegression(const std::vector<_DataType>&);
+			LinearRegression(const std::vector<std::vector<_DataType>>&);
+			bool addPoint(const std::vector<_DataType>&);
+			bool addSet(const std::vector<std::vector<_DataType>>&);
 			size_t dimension();
 			size_t size();
-			string printArg();
+			std::string printArg();
 			void regression();
 		private:
-			vector<vector<_DataType>> trainingSet;
-			vector<_DataType> argWeight;
+			std::vector<std::vector<_DataType>> trainingSet;
+			std::vector<_DataType> argWeight;
 			_DataType argBias;
 			_DataType regressionStep;
 		private:
 			void initializeArgWeight();
-			_DataType getDistance(const vector<_DataType>&);
-			_DataType getRealDistance(const vector<_DataType>&);
+			_DataType getDistance(const std::vector<_DataType>&);
+			_DataType getRealDistance(const std::vector<_DataType>&);
 			_DataType signFunction(const _DataType&);
-			void updateArgViaRegression(const vector<_DataType>&, const _DataType&);
+			void updateArgViaRegression(const std::vector<_DataType>&, const _DataType&);
 	};
 
 	template <typename _DataType>
@@ -404,7 +404,7 @@ namespace dgtk
 	}
 
 	template <typename _DataType>
-	LinearRegression<_DataType>::LinearRegression(const vector<_DataType>& _point)
+	LinearRegression<_DataType>::LinearRegression(const std::vector<_DataType>& _point)
 	{
 		this->LinearRegression();
 		this->addPoint(_point);
@@ -413,7 +413,7 @@ namespace dgtk
 
 	template <typename _DataType>
 	LinearRegression<_DataType>::LinearRegression(
-		const vector<vector<_DataType>>& _set)
+		const std::vector<std::vector<_DataType>>& _set)
 	{
 		this->LinearRegression();
 		this->addSet(_set);
@@ -421,7 +421,7 @@ namespace dgtk
 	}
 
 	template <typename _DataType>
-	bool LinearRegression<_DataType>::addPoint(const vector<_DataType>& _point)
+	bool LinearRegression<_DataType>::addPoint(const std::vector<_DataType>& _point)
 	{
 		bool firstInitialize = this->trainingSet.empty();
 		if (this->trainingSet.size())
@@ -440,7 +440,7 @@ namespace dgtk
 	}
 
 	template <typename _DataType>
-	bool LinearRegression<_DataType>::addSet(const vector<vector<_DataType>>& _set)
+	bool LinearRegression<_DataType>::addSet(const std::vector<std::vector<_DataType>>& _set)
 	{
 		bool firstInitialize = this->trainingSet.empty();
 		if (_set.empty())
@@ -482,19 +482,19 @@ namespace dgtk
 	}
 
 	template <typename _DataType>
-	string LinearRegression<_DataType>::printArg()
+	std::string LinearRegression<_DataType>::printArg()
 	{
-		string printStr = "w: ";
+		std::string printStr = "w: ";
 		if (this->argWeight.size())
 		{
 			printStr += "[";
 			for (const auto& weight: this->argWeight)
 			{
-				printStr = printStr + to_string(weight) + ", ";
+				printStr = printStr + std::to_string(weight) + ", ";
 			}
 			printStr = printStr.substr(0, printStr.size()-2) + "]";
 		}
-		printStr = printStr + ", b:" + to_string(this->argBias);
+		printStr = printStr + ", b:" + std::to_string(this->argBias);
 		return printStr;
 	}
 
@@ -509,7 +509,7 @@ namespace dgtk
 				this->updateArgViaRegression(point,
 					this->signFunction(this->getRealDistance(point)));
 			}
-			cout<<this->printArg()<<endl;
+			std::cout<<this->printArg()<<std::endl;
 		}
 		return;
 	}
@@ -519,7 +519,7 @@ namespace dgtk
 	{
 		if (this->trainingSet.empty())
 		{
-			cerr<<"非法调用!"<<endl;
+			std::cerr<<"非法调用!"<<std::endl;
 			exit(-1);
 		}
 		size_t max_i = this->trainingSet[0].size();
@@ -532,14 +532,14 @@ namespace dgtk
 
 	template <typename _DataType>
 	_DataType LinearRegression<_DataType>::getDistance(
-		const vector<_DataType>& _point)
+		const std::vector<_DataType>& _point)
 	{
 		return abs(this->getRealDistance(_point));
 	}
 
 	template <typename _DataType>
 	_DataType LinearRegression<_DataType>::getRealDistance(
-		const vector<_DataType>& _point)
+		const std::vector<_DataType>& _point)
 	{
 		_DataType distance;
 		_DataType distanceTimes = this->argBias;
@@ -547,8 +547,8 @@ namespace dgtk
 		size_t dimension = this->dimension();
 		if (dimension != _point.size())
 		{
-			cerr<<"维度不同，判断错误!"<<endl;
-			exit(-1);
+			std::cerr<<"维度不同，判断错误!"<<std::endl;
+			std::exit(-1);
 		}
 		for (size_t dimensionI=0; dimensionI!=dimension; dimensionI++)
 		{
@@ -556,9 +556,9 @@ namespace dgtk
 		}
 		for (const auto& weight: this->argWeight)
 		{
-			distanceMinus += pow(weight, 2);
+			distanceMinus += std::pow(weight, 2);
 		}
-		distanceMinus = sqrt(distanceMinus);
+		distanceMinus = std::sqrt(distanceMinus);
 		distance = distanceTimes / distanceMinus;
 		return distance;
 	}
@@ -578,7 +578,7 @@ namespace dgtk
 
 	template <typename _DataType>
 	void LinearRegression<_DataType>::updateArgViaRegression(
-		const vector<_DataType>& _point, const _DataType& _sign)
+		const std::vector<_DataType>& _point, const _DataType& _sign)
 	{
 		size_t dimension = this->dimension();
 		for (size_t dimensionI=0; dimensionI!=dimension; dimensionI++)
@@ -595,29 +595,29 @@ namespace dgtk
 	{
 		public:
 			Perceptron();
-			Perceptron(const pair<vector<_DataType>, _CategoryType>&);
-			Perceptron(const vector<pair<vector<_DataType>, _CategoryType>>&);
-			bool addPoint(const pair<vector<_DataType>, _CategoryType>&);
+			Perceptron(const std::pair<std::vector<_DataType>, _CategoryType>&);
+			Perceptron(const std::vector<std::pair<std::vector<_DataType>, _CategoryType>>&);
+			bool addPoint(const std::pair<std::vector<_DataType>, _CategoryType>&);
 			bool addTrainingSet(
-				const vector<pair<vector<_DataType>, _CategoryType>>&);
+				const std::vector<std::pair<std::vector<_DataType>, _CategoryType>>&);
 			size_t getDimension();
 			size_t size();
-			string getArg();
-			_CategoryType getCategory(const vector<_DataType>&);
+			std::string getArg();
+			_CategoryType getCategory(const std::vector<_DataType>&);
 			void learning();
 		private:
 			size_t dimension;
-			vector<pair<vector<_DataType>, _CategoryType>> trainingSet;
+			std::vector<std::pair<std::vector<_DataType>, _CategoryType>> trainingSet;
 			_DataType argBias;
-			vector<_DataType> argWeight;
+			std::vector<_DataType> argWeight;
 			_DataType learningStep;
 		private:
 			void initializeArgWeight();
 			_CategoryType functionSign(const _DataType&);
 			bool checkPointCategoryRight();
-			bool judgePoint(const pair<vector<_DataType>, _CategoryType>&);
+			bool judgePoint(const std::pair<std::vector<_DataType>, _CategoryType>&);
 			void updateArgViaLearning(
-				const pair<vector<_DataType>, _CategoryType>&);
+				const std::pair<std::vector<_DataType>, _CategoryType>&);
 	};
 
 	template <typename _DataType, typename _CategoryType>
@@ -631,7 +631,7 @@ namespace dgtk
 
 	template <typename _DataType, typename _CategoryType>
 	Perceptron<_DataType, _CategoryType>::Perceptron(
-		const pair<vector<_DataType>, _CategoryType>& _point)
+		const std::pair<std::vector<_DataType>, _CategoryType>& _point)
 	{
 		this->Perceptron();
 		this->addPoint(_point);
@@ -640,7 +640,7 @@ namespace dgtk
 
 	template <typename _DataType, typename _CategoryType>
 	Perceptron<_DataType, _CategoryType>::Perceptron(
-		const vector<pair<vector<_DataType>, _CategoryType>>& _set)
+		const std::vector<std::pair<std::vector<_DataType>, _CategoryType>>& _set)
 	{
 		this->Perceptron();
 		this->addTrainingSet(_set);
@@ -649,7 +649,7 @@ namespace dgtk
 
 	template <typename _DataType, typename _CategoryType>
 	bool Perceptron<_DataType, _CategoryType>::addPoint(
-		const pair<vector<_DataType>, _CategoryType>& _point)
+		const std::pair<std::vector<_DataType>, _CategoryType>& _point)
 	{
 		if (this->dimension)
 		{
@@ -673,7 +673,7 @@ namespace dgtk
 
 	template <typename _DataType, typename _CategoryType>
 	bool Perceptron<_DataType, _CategoryType>::addTrainingSet(
-		const vector<pair<vector<_DataType>, _CategoryType>>& _set)
+		const std::vector<std::pair<std::vector<_DataType>, _CategoryType>>& _set)
 	{
 		if (!_set.first.size())
 		{
@@ -720,27 +720,27 @@ namespace dgtk
 	}
 
 	template <typename _DataType, typename _CategoryType>
-	string Perceptron<_DataType, _CategoryType>::getArg()
+	std::string Perceptron<_DataType, _CategoryType>::getArg()
 	{
-		string res = "w: [";
+		std::string res = "w: [";
 		for (const auto& element: this->argWeight)
 		{
-			res = res + to_string(element) + ", ";
+			res = res + std::to_string(element) + ", ";
 		}
-		res = res.substr(0, res.size()-2) + "], b: " + to_string(this->argBias);
+		res = res.substr(0, res.size()-2) + "], b: " + std::to_string(this->argBias);
 		return res;
 	}
 
 	template <typename _DataType, typename _CategoryType>
 	_CategoryType Perceptron<_DataType, _CategoryType>::getCategory(
-		const vector<_DataType>& _point)
+		const std::vector<_DataType>& _point)
 	{
 		_CategoryType resCategory = (_CategoryType)0;
 		_DataType judge = (_DataType)0;
 		if (_point.size() != this->dimension)
 		{
-			cerr<<"判断用点维度不符"<<endl;
-			exit(-1);
+			std::cerr<<"判断用点维度不符"<<std::endl;
+			std::exit(-1);
 		}
 		for (size_t dimensionN=0; dimensionN!=this->dimension; dimensionN++)
 		{
@@ -760,10 +760,10 @@ namespace dgtk
 			{
 				if (!judgePoint(p))
 				{
-					cout<<"对于点("<<p.first[0]<<","<<p.first[1]<<"): "<<judgePoint(p)<<endl;
+					std::cout<<"对于点("<<p.first[0]<<","<<p.first[1]<<"): "<<judgePoint(p)<<std::endl;
 					this->updateArgViaLearning(p);
 				}
-				cout<<getArg()<<endl;
+				std::cout<<getArg()<<std::endl;
 			}
 		}
 		return;
@@ -795,7 +795,7 @@ namespace dgtk
 
 	template <typename _DataType, typename _CategoryType>
 	bool Perceptron<_DataType, _CategoryType>::judgePoint(
-		const pair<vector<_DataType>, _CategoryType>& _point)
+		const std::pair<std::vector<_DataType>, _CategoryType>& _point)
 	{
 		_CategoryType T = (-1) * _point.second * getCategory(_point.first);
 		if (T > 0)
@@ -810,7 +810,7 @@ namespace dgtk
 
 	template <typename _DataType, typename _CategoryType>
 	void Perceptron<_DataType, _CategoryType>::updateArgViaLearning(
-		const pair<vector<_DataType>, _CategoryType>& _point)
+		const std::pair<std::vector<_DataType>, _CategoryType>& _point)
 	{
 		for (size_t dimensionN=0; dimensionN!=this->dimension; dimensionN++)
 		{
