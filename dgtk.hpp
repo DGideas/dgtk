@@ -92,14 +92,6 @@ namespace dgtk
 			void push_back(const cppdas_data_element&);
 			std::vector<cppdas_data_element> data;
 			size_t number;
-			//typedef decltype(data.begin())&& beginIterator;
-			//typedef decltype(data.rbegin())&& reverseIterator;
-			typedef std::vector<cppdas_data_element>::iterator&& beginIterator;
-			typedef std::vector<cppdas_data_element>::reverse_iterator&& reverseIterator;
-			beginIterator begin();
-			reverseIterator rbegin();
-			beginIterator end();
-			reverseIterator rend();
 			size_t size();
 			bool empty();
 	};
@@ -108,26 +100,6 @@ namespace dgtk
 	{
 		this->data.push_back(_ele);
 		return;
-	}
-	
-	cppdas_dataset_row::beginIterator cppdas_dataset_row::begin()
-	{
-		return this->data.begin();
-	}
-	
-	cppdas_dataset_row::reverseIterator cppdas_dataset_row::rbegin()
-	{
-		return this->data.rbegin();
-	}
-	
-	cppdas_dataset_row::beginIterator cppdas_dataset_row::end()
-	{
-		return this->data.end();
-	}
-	
-	cppdas_dataset_row::reverseIterator cppdas_dataset_row::rend()
-	{
-		return this->data.rend();
 	}
 	
 	size_t cppdas_dataset_row::size()
@@ -205,13 +177,15 @@ namespace dgtk
 			iteratorDistance<_viewRowNumber;
 			iteratorDistance++)
 		{
+			auto instance = this->data.data.data;
 			if (_reverse)
 			{
-				if (this->data.rbegin()+iteratorDistance != this->data.rend())
+				
+				if (instance.rbegin()+iteratorDistance != instance.rend())
 				{
 					std::cout<<iteratorDistance<<"\t";
 					for (const auto& element:
-						*(this->data.rbegin()+iteratorDistance))
+						*(instance.rbegin()+iteratorDistance))
 					{
 						std::cout<<element._data<<"\t";
 					}
@@ -220,11 +194,11 @@ namespace dgtk
 			}
 			else
 			{
-				if (this->data.begin()+iteratorDistance != this->data.end())
+				if (instance.begin()+iteratorDistance != instance.end())
 				{
 					std::cout<<iteratorDistance<<"\t";
 					for (const auto& element:
-						*(this->data.begin()+iteratorDistance))
+						*(instance.begin()+iteratorDistance))
 					{
 						std::cout<<element._data<<"\t";
 					}
