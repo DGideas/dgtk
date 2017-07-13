@@ -156,7 +156,18 @@ namespace dgtk
 						row += letter;
 					}
 				}
-				
+				while (true)
+				{
+					bool findStatus = false;
+					auto findLocation = std::string::npos;
+					for (const auto& _splitUnit: _split)
+					{
+						if (row.find(_splitUnit) != std::string::npos)
+						{
+							findStatus = true;
+						}
+					}
+				}
 			}
 		}
 		return res;
