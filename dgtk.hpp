@@ -48,6 +48,7 @@ namespace dgtk
 	class cppdas_data_element
 	{
 		friend class cppdas_dataset;
+		friend class cppdas_dataset_row;
 		public:
 			cppdas_data_element() = delete;
 			cppdas_data_element(const std::string&,
@@ -85,6 +86,60 @@ namespace dgtk
 			
 	};
 	
+	class cppdas_dataset_row
+	{
+		public:
+			void push_back(const cppdas_data_element&);
+			std::vector<cppdas_data_element> data;
+			size_t number;
+			//typedef decltype(data.begin())&& beginIterator;
+			//typedef decltype(data.rbegin())&& reverseIterator;
+			typedef std::vector<cppdas_data_element>::iterator beginIterator;
+			typedef std::vector<cppdas_data_element>::reverse_iterator reverseIterator;
+			beginIterator begin();
+			reverseIterator rbegin();
+			beginIterator end();
+			reverseIterator rend();
+			size_t size();
+			bool empty();
+	};
+	
+	void cppdas_dataset_row::push_back(const cppdas_data_element& _ele)
+	{
+		this->data.push_back(_ele);
+		return;
+	}
+	
+	cppdas_dataset_row::beginIterator cppdas_dataset_row::begin()
+	{
+		return this->data.begin();
+	}
+	
+	cppdas_dataset_row::reverseIterator cppdas_dataset_row::rbegin()
+	{
+		return this->data.rbegin();
+	}
+	
+	cppdas_dataset_row::beginIterator cppdas_dataset_row::end()
+	{
+		return this->data.end();
+	}
+	
+	cppdas_dataset_row::reverseIterator cppdas_dataset_row::rend()
+	{
+		return this->data.rend();
+	}
+	
+	size_t cppdas_dataset_row::size()
+	{
+		return this->data.size();
+	}
+	
+	bool cppdas_dataset_row::empty()
+	{
+		return this->data.empty();
+	}
+	
 	// cppdas_dataset is a class that storage linear dataset.
 	class cppdas_dataset
 	{
@@ -96,7 +151,7 @@ namespace dgtk
 			cppdas_dataset& operator=(const cppdas_dataset&) = default;
 			~cppdas_dataset() = default;
 		private:
-			typedef std::vector<cppdas_data_element> DataRow;
+			typedef cppdas_dataset_row DataRow;
 		private:
 			std::vector<DataRow> data;
 			std::vector<std::string> title;
@@ -111,7 +166,7 @@ namespace dgtk
 	
 	void cppdas_dataset::setTitle(const DataRow& _dataRow)
 	{
-		for (const cppdas_data_element& element: _dataRow)
+		for (const cppdas_data_element& element: _dataRow.data)
 		{
 			this->title.push_back(element._data);
 		}
