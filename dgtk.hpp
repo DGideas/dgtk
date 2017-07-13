@@ -369,6 +369,227 @@ namespace dgtk
 		
 	};
 	
+	template <typename _DataType = double>
+	class LinearRegression
+	{
+		public:
+			LinearRegression();
+			LinearRegression(const vector<_DataType>&);
+			LinearRegression(const vector<vector<_DataType>>&);
+			bool addPoint(const vector<_DataType>&);
+			bool addSet(const vector<vector<_DataType>>&);
+			size_t dimension();
+			size_t size();
+			string printArg();
+			void regression();
+		private:
+			vector<vector<_DataType>> trainingSet;
+			vector<_DataType> argWeight;
+			_DataType argBias;
+			_DataType regressionStep;
+		private:
+			void initializeArgWeight();
+			_DataType getDistance(const vector<_DataType>&);
+			_DataType getRealDistance(const vector<_DataType>&);
+			_DataType signFunction(const _DataType&);
+			void updateArgViaRegression(const vector<_DataType>&, const _DataType&);
+	};
+
+	template <typename _DataType>
+	LinearRegression<_DataType>::LinearRegression()
+	{
+		this->argBias = (_DataType)0;
+		this->regressionStep = (_DataType)0.001;
+		return;
+	}
+
+	template <typename _DataType>
+	LinearRegression<_DataType>::LinearRegression(const vector<_DataType>& _point)
+	{
+		this->LinearRegression();
+		this->addPoint(_point);
+		return;
+	}
+
+	template <typename _DataType>
+	LinearRegression<_DataType>::LinearRegression(
+		const vector<vector<_DataType>>& _set)
+	{
+		this->LinearRegression();
+		this->addSet(_set);
+		return;
+	}
+
+	template <typename _DataType>
+	bool LinearRegression<_DataType>::addPoint(const vector<_DataType>& _point)
+	{
+		bool firstInitialize = this->trainingSet.empty();
+		if (this->trainingSet.size())
+		{
+			if (this->trainingSet[0].size() != _point.size())
+			{
+				return false;
+			}
+		}
+		this->trainingSet.push_back(_point);
+		if (firstInitialize)
+		{
+			this->initializeArgWeight();
+		}
+		return true;
+	}
+
+	template <typename _DataType>
+	bool LinearRegression<_DataType>::addSet(const vector<vector<_DataType>>& _set)
+	{
+		bool firstInitialize = this->trainingSet.empty();
+		if (_set.empty())
+		{
+			return false;
+		}
+		if (this->trainingSet.size())
+		{
+			if (this->trainingSet[0].size() != _set[0].size())
+			{
+				return false;
+			}
+		}
+		for (const auto& _element: _set)
+		{
+			this->trainingSet.push_back(_element);
+		}
+		if (firstInitialize)
+		{
+			this->initializeArgWeight();
+		}
+		return true;
+	}
+
+	template <typename _DataType>
+	size_t LinearRegression<_DataType>::dimension()
+	{
+		if (this->trainingSet.size())
+		{
+			return this->trainingSet[0].size();
+		}
+		return 0;
+	}
+
+	template <typename _DataType>
+	size_t LinearRegression<_DataType>::size()
+	{
+		return this->trainingSet.size();
+	}
+
+	template <typename _DataType>
+	string LinearRegression<_DataType>::printArg()
+	{
+		string printStr = "w: ";
+		if (this->argWeight.size())
+		{
+			printStr += "[";
+			for (const auto& weight: this->argWeight)
+			{
+				printStr = printStr + to_string(weight) + ", ";
+			}
+			printStr = printStr.substr(0, printStr.size()-2) + "]";
+		}
+		printStr = printStr + ", b:" + to_string(this->argBias);
+		return printStr;
+	}
+
+	template <typename _DataType>
+	void LinearRegression<_DataType>::regression()
+	{
+		size_t times = 2000;
+		for (size_t i=0; i!=times; i++)
+		{
+			for (const auto& point: this->trainingSet)
+			{
+				this->updateArgViaRegression(point,
+					this->signFunction(this->getRealDistance(point)));
+			}
+			cout<<this->printArg()<<endl;
+		}
+		return;
+	}
+
+	template <typename _DataType>
+	void LinearRegression<_DataType>::initializeArgWeight()
+	{
+		if (this->trainingSet.empty())
+		{
+			cerr<<"非法调用!"<<endl;
+			exit(-1);
+		}
+		size_t max_i = this->trainingSet[0].size();
+		for (size_t i=0; i!=max_i; i++)
+		{
+			this->argWeight.push_back((_DataType)1);
+		}
+		return;
+	}
+
+	template <typename _DataType>
+	_DataType LinearRegression<_DataType>::getDistance(
+		const vector<_DataType>& _point)
+	{
+		return abs(this->getRealDistance(_point));
+	}
+
+	template <typename _DataType>
+	_DataType LinearRegression<_DataType>::getRealDistance(
+		const vector<_DataType>& _point)
+	{
+		_DataType distance;
+		_DataType distanceTimes = this->argBias;
+		_DataType distanceMinus = (_DataType)0;
+		size_t dimension = this->dimension();
+		if (dimension != _point.size())
+		{
+			cerr<<"维度不同，判断错误!"<<endl;
+			exit(-1);
+		}
+		for (size_t dimensionI=0; dimensionI!=dimension; dimensionI++)
+		{
+			distanceTimes += this->argWeight[dimensionI] * _point[dimensionI];
+		}
+		for (const auto& weight: this->argWeight)
+		{
+			distanceMinus += pow(weight, 2);
+		}
+		distanceMinus = sqrt(distanceMinus);
+		distance = distanceTimes / distanceMinus;
+		return distance;
+	}
+
+	template <typename _DataType>
+	_DataType LinearRegression<_DataType>::signFunction(const _DataType& _var)
+	{
+		if (_var > 0)
+		{
+			return (_DataType)1;
+		}
+		else
+		{
+			return (_DataType)-1;
+		}
+	}
+
+	template <typename _DataType>
+	void LinearRegression<_DataType>::updateArgViaRegression(
+		const vector<_DataType>& _point, const _DataType& _sign)
+	{
+		size_t dimension = this->dimension();
+		for (size_t dimensionI=0; dimensionI!=dimension; dimensionI++)
+		{
+			this->argWeight[dimensionI] = this->argWeight[dimensionI] +
+				_sign * _point[dimensionI] * this->regressionStep * (-1);
+		}
+		this->argBias = this->argBias + _sign * this->regressionStep * (-1);
+		return;
+	}
+	
 	template <typename _DataType = double, typename _CategoryType = int>
 	class Perceptron
 	{
