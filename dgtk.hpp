@@ -19,18 +19,47 @@ namespace dgtk
 // In order to avoid look-up ambiguous, using std:: prefix
 // when you use standard library components.
 {
+	// This class manage the basic type used in cppdas dataset.
+	class cppdas_basic_type
+	{
+		friend class cppdas_data_element;
+		friend class cppdas_dataset;
+		protected:
+			enum cppdas_type
+			{
+				pd_int,   // Integer type: long long
+				pd_float, // Float   type: double
+				pd_string // String  type: std::string
+			};
+	};
+	
+	// cppdas_data_element is the base class can storage a data
+	// we use _type to identifier each type, and each type was
+	// storaged by byte-stream using std::string.
+	class cppdas_data_element
+	{
+		friend class cppdas_dataset;
+		public:
+			cppdas_data_element() = default;
+			cppdas_data_element(const cppdas_data_element&) = default;
+			cppdas_data_element(cppdas_data_element&&) = default;
+			cppdas_data_element& operator=(const cppdas_data_element&) =
+				default;
+			~cppdas_data_element();
+		private:
+			std::string _data;
+	};
+	
 	// cppdas_dataset is a class that storage linear dataset.
 	class cppdas_dataset
 	{
+		friend class cppdas;
 		public:
-			cppdas_dataset()
-			{
-				std::cout<<"Construct"<<std::endl;
-			}
-			~cppdas_dataset()
-			{
-				std::cout<<"distruct"<<std::endl;
-			}
+			cppdas_dataset() = default;
+			cppdas_dataset(const cppdas_dataset&) = default;
+			cppdas_dataset(cppdas_dataset&&) = default;
+			cppdas_dataset& operator=(const cppdas_dataset&) = default;
+			~cppdas_dataset() = default;
 	};
 	
 	// Like Python pandas, cppdas is a class about C++ data analysis.
@@ -53,6 +82,7 @@ namespace dgtk
 				const std::vector<std::string>&, const bool&);
 	};
 	
+	// The default character used in string split.
 	const std::vector<std::string> cppdas::defaultSplitCharacter = {","};
 	
 	cppdas_dataset cppdas::read_csv(const std::string& _string,
@@ -89,4 +119,10 @@ namespace dgtk
 	{
 		
 	}
+	
+	template <typename _ElemType>
+	class matrix_base
+	{
+		
+	};
 }
