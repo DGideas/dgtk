@@ -348,6 +348,7 @@ namespace dgtk
 					}
 				}
 				if (data.size())
+				{
 					if (rowNumber || !_haveHeader)
 						res.data.push_back(data);
 					else
@@ -356,6 +357,7 @@ namespace dgtk
 					// If we meet a blank line, ignore it and row number
 					// doesn't increase.
 					rowNumber++;
+				}
 			}
 		}
 		return res;
