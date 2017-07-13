@@ -16,3 +16,11 @@ gitminorchanges:
 	git add -A .
 	git commit -m "Minor changes and improvements"
 	git push
+
+gitpush:
+	git add -A .
+	git commit
+	git push
+
+gitstash:
+	git stash
