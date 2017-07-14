@@ -202,16 +202,19 @@ namespace dgtk
 			std::vector<DataRow> instance = this->data;
 			if (_reverse)
 			{
-				
-				if (instance.rbegin()+iteratorDistance != instance.rend())
+				if (instance.end()-_viewRowNumber+iteratorDistance != instance.end())
 				{
-					std::cout<<iteratorDistance<<"\t";
+					std::cout<<(instance.end()-_viewRowNumber+iteratorDistance)->number<<"\t";
 					for (const auto& element:
-						(instance.rbegin()+iteratorDistance)->data)
+						(instance.end()-_viewRowNumber+iteratorDistance)->data)
 					{
 						std::cout<<element._data<<"\t";
 					}
 					std::cout<<std::endl;
+				}
+				else
+				{
+					break;
 				}
 			}
 			else
@@ -225,6 +228,10 @@ namespace dgtk
 						std::cout<<element._data<<"\t";
 					}
 					std::cout<<std::endl;
+				}
+				else
+				{
+					break;
 				}
 			}
 		}
@@ -340,13 +347,16 @@ namespace dgtk
 					{
 						if (row.size())
 							data.push_back(row);
+							data.number = rowNumber;
 						break;
 					}
 				}
 				if (data.size())
 				{
 					if (rowNumber || !_haveHeader)
+					{
 						res.data.push_back(data);
+					}
 					else
 						// It is the first line of file
 						res.setTitle(data);
